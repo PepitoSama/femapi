@@ -1,2 +1,0 @@
-https://cloud.mongodb.com/v2/5e5aad1f1814307e5f8e5d92#clusters
-
