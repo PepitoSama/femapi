@@ -1,5 +1,12 @@
 const mongoose = require('mongoose')
 
+/*
+|===============================================================================
+| User Model
+| This file contain the User Model that is used in Database
+|===============================================================================
+*/
+
 const UserSchema = mongoose.Schema({
   username: {
     type: String,

@@ -1,16 +1,21 @@
 const express = require('express')
 const router = express.Router()
 
-// Model
+// User Model
 const User = require('../models/User')
 
-// Routes
+/*
+|===============================================================================
+| User routes
+| This file contain all route to handle /user request
+|===============================================================================
+*/
 router.get('/', async (req, res) => {
   try {
     const users = await User.find()
     res.json(users)
   } catch (err) {
-    res.json({ message: err })
+    res.status(500).json({ message: err })
   }
 })
 

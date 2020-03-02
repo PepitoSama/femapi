@@ -1,5 +1,13 @@
 const Joi = require('@hapi/joi')
 
+/*
+|===============================================================================
+| User Model Verification
+| This file contain the User Model Verification functions that are used to
+| check if data are well typed
+|===============================================================================
+*/
+
 // Register Valisation
 const registerValidation = (data) => {
   const user = Joi.object({

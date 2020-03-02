@@ -13,10 +13,13 @@ app.use(bodyParser.json())
 
 // Routes
 const userRoute = require('./routes/user')
-app.use('/user', userRoute)
-
 const authRoute = require('./routes/auth')
+const remarkRoute = require('./routes/remark')
+
+// Routes Middleware
+app.use('/user', userRoute)
 app.use('/api/user', authRoute)
+app.use('/api/remark', remarkRoute)
 
 // Connection to MongoDb
 mongoose.connect(
