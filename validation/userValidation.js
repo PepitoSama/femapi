@@ -23,7 +23,7 @@ const registerValidation = (data) => {
     email: Joi
       .string()
       .min(6)
-      .max(255)
+      .max(320)
       .required()
       .email()
   })

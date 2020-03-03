@@ -25,9 +25,10 @@ const RemarkSchema = mongoose.Schema({
   likes: [{
     userId: mongoose.Schema.Types.ObjectId
   }],
-  comments: [{
+  responses: [{
+    idResponse: Number,
     userId: mongoose.Schema.Types.ObjectId,
-    comment: String,
+    content: String,
     likes: [{
       userId: mongoose.Schema.Types.ObjectId
     }]
