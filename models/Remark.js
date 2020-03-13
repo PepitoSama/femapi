@@ -17,20 +17,35 @@ const RemarkSchema = mongoose.Schema({
     required: true,
     min: 3
   },
-  userId: {
-    type: mongoose.Schema.Types.ObjectId,
-    required: true
+  user: {
+    userId: {
+      type: mongoose.Schema.Types.ObjectId,
+      required: true
+    },
+    username: {
+      type: String,
+      required: true
+    }
   },
   tags: [String],
   likes: [{
-    userId: mongoose.Schema.Types.ObjectId
+    user: {
+      userId: mongoose.Schema.Types.ObjectId,
+      username: String
+    }
   }],
   responses: [{
     idResponse: Number,
-    userId: mongoose.Schema.Types.ObjectId,
+    user: {
+      userId: mongoose.Schema.Types.ObjectId,
+      username: String
+    },
     content: String,
     likes: [{
-      userId: mongoose.Schema.Types.ObjectId
+      user: {
+        userId: mongoose.Schema.Types.ObjectId,
+        username: String
+      }
     }]
   }]
 })

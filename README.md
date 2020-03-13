@@ -17,6 +17,7 @@ Status 500 : { error: 'Internal Server Error' }
 ________________________________________________________________________
 Register, POST
 /api/user/register
+
 Body :
 {
     "username": "...", // Min 6, Max 255, required
@@ -37,6 +38,12 @@ Remark :
 
 Get all Remarks, GET
 /api/remark
+
+Body :
+{
+    "start": "..." // Start index
+    "number": "..." // Number of remark to get
+}
 
 Response
 Status 200 : All remarks in JSON

@@ -14,32 +14,37 @@ router.post('/register', async (req, res) => {
   const { error } = registerValidation(req.body)
   if (error) return res.status(400).send({ error: error.details[0].message })
 
-  // Check if user already exist
-  const emailExist = await User.findOne({ email: req.body.email })
-  if (emailExist) return res.status(400).send({ error: 'Email Already exist !' })
-  const usernameExist = await User.findOne({ username: req.body.username })
-  if (usernameExist) return res.status(400).send({ error: 'Username Already taken !' })
-
-  // Hash the password
-  const salt = await bcrypt.genSalt(10)
-  const hashPassword = await bcrypt.hash(req.body.password, salt)
-
-  // Create and save the new user
-  const user = new User({
-    username: req.body.username,
-    password: hashPassword,
-    email: req.body.email
-  })
-
-  try {
-    const savedUser = await user.save()
-    res.status(201).json({
-      id: savedUser._id,
-      username: savedUser.username
+  // Check if email already exist
+  User.findOne({ email: req.body.email }).then((emailExist) => {
+    if (emailExist) return res.status(400).send({ error: 'Email Already exist !' })
+    // Check if username already exist
+    User.findOne({ username: req.body.username }).then((usernameExist) => {
+      if (usernameExist) return res.status(400).send({ error: 'Username Already taken !' })
     })
-  } catch (err) {
-    res.status(500).json({ error: 'Internal Server Error' })
-  }
+
+    // Hash the password
+    bcrypt.genSalt(10).then((salt) => {
+      bcrypt.hash(req.body.password, salt).then((hashPassword) => {
+        // Create and save the new user
+        const user = new User({
+          username: req.body.username,
+          password: hashPassword,
+          email: req.body.email
+        })
+
+        try {
+          user.save().then((savedUser) => {
+            res.status(201).json({
+              id: savedUser._id,
+              username: savedUser.username
+            })
+          })
+        } catch (err) {
+          res.status(500).json({ error: 'Internal Server Error' })
+        }
+      })
+    })
+  })
 })
 
 router.post('/login', async (req, res) => {
@@ -49,18 +54,18 @@ router.post('/login', async (req, res) => {
 
   try {
     // Check if user already exist
-    const user = await User.findOne({
+    User.findOne({
       username: req.body.username
+    }).then((user) => {
+      if (!user) return res.status(400).send({ error: 'Authentification failed' })
+      // Check if password is correct
+      bcrypt.compare(req.body.password, user.password).then((validPass) => {
+        if (!validPass) return res.status(400).send({ error: 'Authentification failed' })
+        // Create a token for user
+        const token = jwt.sign({ _id: user._id, username: user.username }, process.env.TOKEN_SECRET)
+        res.header('auth-token', token).send()
+      })
     })
-    if (!user) return res.status(400).send({ error: 'Authentification failed' })
-
-    // Check if password is correct
-    const validPass = await bcrypt.compare(req.body.password, user.password)
-    if (!validPass) return res.status(400).send({ error: 'Authentification failed' })
-
-    // Create a token for user
-    const token = jwt.sign({ _id: user._id }, process.env.TOKEN_SECRET)
-    res.header('auth-token', token).send()
   } catch (error) {
     res.status(500).json({ error: 'Internal Server Error' })
   }
