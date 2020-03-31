@@ -4,8 +4,6 @@ const router = require('express').Router()
 const connected = require('./privateRouter')
 // Remarks Model
 const Remark = require('../models/Remark')
-// User Model
-const User = require('../models/User')
 // Model Validation
 const { remarkValidation, responseValidation, likeValidation } = require('../validation/remarkValidation')
 
@@ -25,11 +23,18 @@ const { remarkValidation, responseValidation, likeValidation } = require('../val
 */
 router.get('/', async (req, res) => {
   try {
-    var number = req.body.number || 10
-    Remark.find().skip(req.body.start).limit(number).then((result) => {
-      res.status(200).json(result)
+    const number = req.query.number === '0'
+      ? 0
+      : parseInt(req.query.number) || 1
+    const start = parseInt(req.query.start) || 0
+    var findConfig = {}
+    if (req.query.search) {
+      findConfig = { tags: { $all: req.query.search.split(' ') } }
     }
-    )
+
+    Remark.find(findConfig).skip(start).limit(number).then((result) => {
+      res.status(200).json(result)
+    })
   } catch (err) {
     // 500 Internal Server Error
     res.status(500).json({ error: 'Internal Server Error' })
@@ -60,7 +65,6 @@ router.get('/:id', async (req, res) => {
 router.post('/', connected, async (req, res) => {
   // Check if remark is valid
   const { error } = remarkValidation(req.body)
-
   // 400 Bad Request
   if (error) return res.status(400).send({ error: error.details[0].message })
 
@@ -181,7 +185,7 @@ router.delete('/:id', connected, async (req, res) => {
 | Restriction : User must be connected
 |===============================================================================
 */
-router.post('/response/:id', connected, async (req, res) => {
+router.post('/:id', connected, async (req, res) => {
   // Check if Response is valid
   const { error } = responseValidation(req.body)
   // 400 Bad Request
@@ -205,7 +209,7 @@ router.post('/response/:id', connected, async (req, res) => {
 
     // Add response to the remark
     try {
-      Remark.updateOne({
+      Remark.findOneAndUpdate({
         id: req.params.id
       }, {
         $addToSet: {
@@ -218,17 +222,20 @@ router.post('/response/:id', connected, async (req, res) => {
             content: req.body.content
           }
         }
-      }).then(() => {
+      }, {
+        new: true,
+        useFindAndModify: false
+      }).then((result) => {
         // 201 Created
-        res.status(201).send({ id: idNewResponse })
+        res.status(201).send(result)
       })
     } catch (err) {
       // 500 Internal Server Error
-      res.status(500).json({ error: 'Internal Server Error' })
+      res.status(500).json({ error: 'Internal Server Error 1' })
     }
   } catch (err) {
     // 500 Internal Server Error
-    res.status(500).json({ error: 'Internal Server Error' })
+    res.status(500).json({ error: 'Internal Server Error 2' })
   }
 })
 
@@ -255,7 +262,7 @@ router.post('/like/:id', connected, async (req, res) => {
 
       // Check if user already liked the remark
       Remark.findOne({
-        'id': req.params.id,
+        id: req.params.id,
         'likes.user.userId': req.user._id
       }).then((liked) => {
         // Add like to the remark
@@ -356,7 +363,6 @@ router.post('/:idRemark/like/:idResponse', connected, async (req, res) => {
 
       // Add like to the remark
       if (!liked && req.body.value) {
-
         remark.responses.forEach((response) => {
           if (response.idResponse.toString() === req.params.idResponse) {
             response.likes.push({

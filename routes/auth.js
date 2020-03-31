@@ -63,7 +63,9 @@ router.post('/login', async (req, res) => {
         if (!validPass) return res.status(400).send({ error: 'Authentification failed' })
         // Create a token for user
         const token = jwt.sign({ _id: user._id, username: user.username }, process.env.TOKEN_SECRET)
-        res.header('auth-token', token).send()
+        res.header('auth-token', token).json({
+          'auth-token': token
+        })
       })
     })
   } catch (error) {
