@@ -43,6 +43,26 @@ router.get('/', async (req, res) => {
 
 /*
 |===============================================================================
+| GET /max
+| Get max remark available
+| Restriction : No
+|===============================================================================
+*/
+router.get('/max', async (req, res) => {
+  try {
+    Remark.count({}, (err, max) => {
+      err
+        ? console.log(err)
+        : res.status(200).json({ max: max })
+    })
+  } catch (err) {
+    // 500 Internal Server Error
+    res.status(500).json({ error: 'Internal Server Error' })
+  }
+})
+
+/*
+|===============================================================================
 | GET :id
 | Get on remark from it id
 | Restriction : No
